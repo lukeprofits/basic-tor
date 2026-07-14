@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basic-tor"
+version = "0.1.0"
+description = "An intentionally tiny Tor library for Python. Auto-manages the official Tor binary and exposes a local SOCKS proxy."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Luke Profits" }]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.28",
+    "platformdirs>=3.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Security",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "build>=1.0",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "types-requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/lukeprofits/basic-tor"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["basic_tor*"]
+
+[tool.setuptools.package-data]
+basic_tor = ["py.typed"]
+
+[tool.setuptools.exclude-package-data]
+basic_tor = ["bin/**"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "network: tests that download the bundle and/or bootstrap the Tor network (deselect with -m 'not network')",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:requests",
+]
+
+[tool.mypy]
+# Runtime support floor is 3.9 (requires-python above); modern mypy can no
+# longer model 3.9, so type-check against the oldest version it still can.
+python_version = "3.10"
+files = ["src/basic_tor"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["platformdirs.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+# E501: long-line; project favours readable error strings.
+# S101: assert is fine in tests.
+# S603/S607: subprocess args are static lists; never shell=True.
+ignore = ["E501", "S101", "S603", "S607"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S"]
+"src/basic_tor/__init__.py" = ["S110"]
